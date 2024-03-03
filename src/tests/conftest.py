@@ -17,8 +17,6 @@ from src.models.base import BaseModel
 from src.models.books import Book  # noqa F401
 from src.models.sellers import Seller
 
-# from src.tests.test_books_with_pytest import create_seller
-
 # Переопределяем движок для запуска тестов и подключаем его к тестовой базе.
 # Это решает проблему с сохранностью данных в основной базе приложения.
 # Фикстуры тестов их не зачистят.

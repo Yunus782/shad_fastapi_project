@@ -6,7 +6,7 @@ from src.schemas import ReturnedBook
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-__all__ = ["IncomingSeller", "ReturnedAllSellers", "ReturnedSeller", "ReturnedSellersDetails"]
+__all__ = ["IncomingSeller", "ReturnedAllSellers", "ReturnedSeller", "ReturnedSellersDetails", "SellerUpdate"]
 
 
 class BaseSeller(BaseModel):

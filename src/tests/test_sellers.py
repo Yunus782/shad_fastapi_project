@@ -5,7 +5,6 @@ from sqlalchemy import select
 from src.models import sellers
 
 
-# Тест на ручку создающую книгу
 @pytest.mark.asyncio
 async def test_create_seller(async_client):
     data = {"first_name": "Seller", "last_name": "Sellerow", "email": "seller1@mail.ru", "password": "password1"}
