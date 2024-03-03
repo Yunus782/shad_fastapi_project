@@ -1,23 +1,23 @@
-from typing import Optional
-
 from pydantic import BaseModel, field_validator, EmailStr, Field
 from passlib.context import CryptContext
 from pydantic_core import PydanticCustomError
 
+from src.schemas import ReturnedBook
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-__all__ = ["IncomingSeller", "ReturnedAllSellers", "ReturnedSeller"]
+__all__ = ["IncomingSeller", "ReturnedAllSellers", "ReturnedSeller", "ReturnedSellersDetails"]
 
 
 class BaseSeller(BaseModel):
     first_name: str = Field(..., min_length=2, max_length=50)
     last_name: str = Field(..., min_length=2, max_length=50)
     email: EmailStr
-    password: str
 
 
 class IncomingSeller(BaseSeller):
+    password: str
+
     @field_validator("first_name", "last_name")
     @staticmethod
     def validate_name_fields(value: str, field: str):
@@ -34,12 +34,24 @@ class IncomingSeller(BaseSeller):
 
 
 class ReturnedSeller(BaseSeller):
-    id: Optional[int] = None
+    id: int
 
-    class Config:
-        orm_mode = True
-        exclude = {'password'}
+
+class ReturnedSellersDetails(ReturnedSeller):
+    books: list[ReturnedBook]
 
 
 class ReturnedAllSellers(BaseModel):
-    books: list[ReturnedSeller]
+    sellers: list[ReturnedSeller]
+
+
+class SellerUpdate(BaseModel):
+    first_name: str = Field(None, min_length=2, max_length=50)
+    last_name: str = Field(None, min_length=2, max_length=50)
+    email: EmailStr = None
+    @field_validator("first_name", "last_name")
+    @staticmethod
+    def validate_name_fields(value: str, field: str):
+        if not value.isalpha():
+            raise PydanticCustomError("Validation error", f"{field} must contain only letters")
+        return value
