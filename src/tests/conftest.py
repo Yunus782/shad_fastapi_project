@@ -8,17 +8,23 @@ import asyncio
 import httpx
 import pytest
 import pytest_asyncio
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from src.configurations.settings import settings
 from src.models import books  # noqa
 from src.models.base import BaseModel
 from src.models.books import Book  # noqa F401
+from src.models.sellers import Seller
+
+# from src.tests.test_books_with_pytest import create_seller
 
 # Переопределяем движок для запуска тестов и подключаем его к тестовой базе.
 # Это решает проблему с сохранностью данных в основной базе приложения.
 # Фикстуры тестов их не зачистят.
 # и обеспечивает чистую среду для запуска тестов. В ней не будет лишних записей.
+
+
 async_test_engine = create_async_engine(
     settings.database_test_url,
     echo=True,
@@ -54,6 +60,32 @@ async def db_session():
         async with async_test_session(bind=connection) as session:
             yield session
             await session.rollback()
+
+
+async def create_seller(db_session):
+    existing_seller = await db_session.execute(
+        select(Seller).where(Seller.email == "seller@mail.ru")
+    )
+    seller = existing_seller.scalars().first()
+    if seller:
+        return seller
+
+    seller = Seller(
+        first_name="Seller",
+        last_name="Sellerow",
+        email="seller@mail.ru",
+        password="password"
+    )
+    db_session.add(seller)
+    await db_session.commit()
+    await db_session.refresh(seller)
+    return seller
+
+
+@pytest_asyncio.fixture(scope="function")
+async def add_seller(db_session):
+    seller = await create_seller(db_session)
+    return seller
 
 
 # Коллбэк для переопределения сессии в приложении
