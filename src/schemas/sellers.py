@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator, EmailStr, Field
+from pydantic import BaseModel, field_validator, EmailStr, Field, ConfigDict
 from passlib.context import CryptContext
 from pydantic_core import PydanticCustomError
 
@@ -41,8 +41,7 @@ class ReturnedSeller(BaseSeller):
 class ReturnedSellersDetails(ReturnedSeller):
     books: list[SellerBook]
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ReturnedAllSellers(BaseModel):

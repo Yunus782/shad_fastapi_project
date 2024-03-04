@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from pydantic_core import PydanticCustomError
 
 __all__ = ["IncomingBook", "ReturnedAllBooks", "ReturnedBook", "SellerBook"]
@@ -46,6 +46,4 @@ class SellerBook(BaseModel):
     year: int
     count_pages: int
 
-    class Config:
-        orm_mode = True
-        exclude = {"seller_id"}
+    model_config = ConfigDict(from_attributes=True)
