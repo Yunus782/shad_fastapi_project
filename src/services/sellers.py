@@ -37,9 +37,6 @@ class SellerService:
     def hash_password(self, password: str) -> str:
         return pwd_context.hash(password)
 
-    def verify_password(self, request_password: str, seller_password: str) -> bool:
-        return pwd_context.hash(request_password) == seller_password
-
     async def authenticate_user(self, email: str, password: str) -> Optional[Seller]:
         result = await self.db_session.execute(select(Seller).where(Seller.email == email))
         seller = result.scalar_one_or_none()
