@@ -37,6 +37,24 @@ class SellerService:
     def hash_password(self, password: str) -> str:
         return pwd_context.hash(password)
 
+    def verify_password(self, request_password: str, seller_password: str) -> bool:
+        return pwd_context.hash(request_password) == seller_password
+
+    async def authenticate_user(self, email: str, password: str) -> Optional[Seller]:
+        result = await self.db_session.execute(select(Seller).where(Seller.email == email))
+        seller = result.scalar_one_or_none()
+        if seller is not None:
+            if pwd_context.verify(password, seller.password):
+                return seller
+        return None
+
+    async def get_seller_by_email(self, email: str) -> Optional[Seller]:
+        result = await self.db_session.execute(select(Seller).where(Seller.email == email))
+        seller = result.scalar_one_or_none()
+        if seller:
+            return seller
+        return None
+
     async def get_all_sellers(self):
         result = await self.db_session.execute(select(Seller))
         sellers = result.scalars().all()

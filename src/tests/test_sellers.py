@@ -1,8 +1,10 @@
 import pytest
 from fastapi import status
+from jose import jwt
 from sqlalchemy import select
 
 from src.models import sellers
+from src.routers.v1.token import SECRET_KEY, ALGORITHM
 
 
 @pytest.mark.asyncio
@@ -44,10 +46,13 @@ async def test_get_sellers(db_session, async_client):
 async def test_get_single_seller(db_session, async_client):
     seller = sellers.Seller(first_name="Seller", last_name="Sellerow", email="seller4@mail.ru", password="password1")
 
+    token_data = {"sub": seller.email}
+    test_token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
+
     db_session.add_all([seller])
     await db_session.flush()
 
-    response = await async_client.get(f"/api/v1/seller/{seller.id}")
+    response = await async_client.get(f"/api/v1/seller/{seller.id}", headers={"Authorization": f"Bearer {test_token}"})
 
     assert response.status_code == status.HTTP_200_OK
 

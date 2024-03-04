@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.status import HTTP_204_NO_CONTENT
 
 from src.configurations.database import get_async_session
+from src.routers.v1.token import get_current_user
 from src.schemas.sellers import ReturnedSeller, IncomingSeller, ReturnedAllSellers, ReturnedSellersDetails, SellerUpdate
 from src.services.sellers import SellerService
 
@@ -29,7 +30,7 @@ async def get_all_sellers(session: AsyncSession = DBSession):
     return {"sellers": sellers}
 
 
-@seller_router.get("/{seller_id}", response_model=ReturnedSellersDetails)
+@seller_router.get("/{seller_id}", response_model=ReturnedSellersDetails, dependencies=[Depends(get_current_user)])
 async def get_seller(seller_id: int, session: AsyncSession = DBSession):
     seller_service = SellerService(session)
     seller = await seller_service.get_seller_by_id(seller_id)
@@ -41,7 +42,7 @@ async def get_seller(seller_id: int, session: AsyncSession = DBSession):
 @seller_router.put("/{seller_id}", response_model=ReturnedSeller)
 async def update_seller(seller_id: int, seller_update: SellerUpdate, session: AsyncSession = DBSession):
     seller_service = SellerService(session)
-    updated_seller = await seller_service.update_seller(seller_id, seller_update.dict(exclude_unset=True))
+    updated_seller = await seller_service.update_seller(seller_id, seller_update.model_dump(exclude_unset=True))
     if updated_seller is None:
         raise HTTPException(status_code=404, detail="Seller not found")
     return updated_seller

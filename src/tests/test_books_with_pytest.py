@@ -1,16 +1,22 @@
 import pytest
 from fastapi import status
+from jose import jwt
 from sqlalchemy import select
 
 from src.models import books
+from src.routers.v1.token import SECRET_KEY, ALGORITHM
 
 
 # Тест на ручку создающую книгу
 @pytest.mark.asyncio
 async def test_create_book(async_client, add_seller):
     seller = add_seller
+
+    token_data = {"sub": seller.email}
+    test_token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
+
     data = {"title": "Wrong Code", "author": "Robert Martin", "pages": 104, "year": 2007, "seller_id": seller.id}
-    response = await async_client.post("/api/v1/books/", json=data)
+    response = await async_client.post("/api/v1/books/", json=data, headers={"Authorization": f"Bearer {test_token}"})
     assert response.status_code == status.HTTP_201_CREATED
 
     result_data = response.json()
@@ -108,6 +114,10 @@ async def test_update_book(db_session, async_client, add_seller):
     # Создаем книги вручную, а не через ручку, чтобы нам не попасться на ошибку которая
     # может случиться в POST ручке
     seller = add_seller
+
+    token_data = {"sub": seller.email}
+    test_token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
+
     book = books.Book(author="Pushkin", title="Eugeny Onegin", year=2001, count_pages=104, seller_id=seller.id)
 
     db_session.add(book)
@@ -117,6 +127,7 @@ async def test_update_book(db_session, async_client, add_seller):
         f"/api/v1/books/{book.id}",
         json={"title": "Mziri", "author": "Lermontov", "count_pages": 100,
               "year": 2007, "id": book.id, "seller_id": seller.id},
+        headers = {"Authorization": f"Bearer {test_token}"}
     )
 
     assert response.status_code == status.HTTP_200_OK
