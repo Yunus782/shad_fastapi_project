@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     db_test_name: str = "fastapi_project_test_db"
     max_connection_count: int = 10
 
+    secret_key_jwt: str
+
     @property
     def database_url(self) -> str:
         return f"{self.db_host}/{self.db_name}"
@@ -29,6 +31,10 @@ class Settings(BaseSettings):
     @property
     def database_test_url(self) -> str:
         return f"{self.db_host}/{self.db_test_name}"
+
+    @property
+    def secret_key_jwt(self) -> str:
+        return f"{self.secret_key_jwt}"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

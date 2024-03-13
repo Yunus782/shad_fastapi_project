@@ -5,7 +5,7 @@ from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 from dotenv import load_dotenv
-import os
+from src.configurations.settings import settings
 
 from src.configurations import get_async_session
 from src.schemas.token import TokenData
@@ -16,7 +16,7 @@ load_dotenv()
 
 token_router = APIRouter(tags=["token"], prefix="/token")
 
-SECRET_KEY = os.getenv("SECRET_KEY_JWT")
+SECRET_KEY = settings.secret_key_jwt
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 

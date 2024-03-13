@@ -30,7 +30,7 @@ class SellerService:
             password=hashed_password
         )
         self.db_session.add(new_seller)
-        await self.db_session.commit()
+        await self.db_session.flush()
         await self.db_session.refresh(new_seller)
         return new_seller
 
@@ -69,7 +69,7 @@ class SellerService:
             return None
         for key, value in seller_update.items():
             setattr(result, key, value)
-        await self.db_session.commit()
+        await self.db_session.flush()
         await self.db_session.refresh(result)
         return result
 
@@ -77,4 +77,4 @@ class SellerService:
         result = await self.db_session.get(Seller, seller_id)
         if result:
             await self.db_session.delete(result)
-            await self.db_session.commit()
+            await self.db_session.flush()
